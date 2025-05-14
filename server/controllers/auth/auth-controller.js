@@ -131,7 +131,7 @@ const logoutUser = (req, res) => {
 
 
 const authMiddleware = async (req, res, next) => {
-  const authHeader = req.hearders['authurization'];
+  const authHeader = req.headers['authurization'];
   const token = authHeader && authHeader.split(' ')[1]
   if (!token)
     return res.status(401).json({
