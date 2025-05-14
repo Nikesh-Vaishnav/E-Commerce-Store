@@ -30,8 +30,6 @@ function AuthLogin() {
           title: data.message || "Login successful",
         });
 
-        // Redirect if needed
-        navigate("/dashboard");
       } else {
         toast({
           title: data.message || "Login failed",
