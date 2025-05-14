@@ -4,7 +4,8 @@ import { loginFormControls } from "@/config";
 import { loginUser } from "@/store/auth-slice";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 const initialState = {
   email: "",
@@ -15,22 +16,35 @@ function AuthLogin() {
   const [formData, setFormData] = useState(initialState);
   const dispatch = useDispatch();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  function onSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault();
 
-    dispatch(loginUser(formData)).then((data) => {
-      if (data?.payload?.success) {
+    try {
+      const resultAction = await dispatch(loginUser(formData));
+      const data = unwrapResult(resultAction);
+
+      if (data.success) {
         toast({
-          title: data?.payload?.message,
+          title: data.message || "Login successful",
         });
+
+        // Redirect if needed
+        navigate("/dashboard");
       } else {
         toast({
-          title: data?.payload?.message,
+          title: data.message || "Login failed",
           variant: "destructive",
         });
       }
-    });
+    } catch (error) {
+      toast({
+        title: "An error occurred during login",
+        description: error.message || "Please try again later",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -40,7 +54,7 @@ function AuthLogin() {
           Sign in to your account
         </h1>
         <p className="mt-2">
-          Don't have an account
+          Don't have an account?
           <Link
             className="font-medium ml-2 text-primary hover:underline"
             to="/auth/register"
@@ -51,7 +65,7 @@ function AuthLogin() {
       </div>
       <CommonForm
         formControls={loginFormControls}
-        buttonText={"Sign In"}
+        buttonText="Sign In"
         formData={formData}
         setFormData={setFormData}
         onSubmit={onSubmit}
